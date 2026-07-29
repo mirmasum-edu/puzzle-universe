@@ -36,3 +36,13 @@ npm install
 cp .env.example .env      # set DATABASE_URL and JWT_SECRET
 npx drizzle-kit push      # create tables
 npm run dev               # http://localhost:3000
+
+
+
+---
+
+### Notes
+- **Option A** is my recommendation for the GitHub "About" box — it's within the character limit and hits the key points.
+- Your repo already has a full `README.md` committed, so this is mainly for the short **About** description and topics.
+
+Want me to also generate a **social preview tagline** or a **LICENSE** file to complete the repo?
