@@ -18,6 +18,7 @@ const NAV: NavItem[] = [
   { href: "/dashboard/shop", label: "Shop", icon: "🛍️" },
   { href: "/dashboard/events", label: "Events", icon: "🎉" },
   { href: "/dashboard/profile", label: "Profile", icon: "👤" },
+  { href: "/dashboard/about", label: "About Creator", icon: "👨‍💻" },
   { href: "/dashboard/admin", label: "Admin", icon: "🛠️", admin: true },
 ];
 

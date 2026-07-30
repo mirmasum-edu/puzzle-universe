@@ -50,14 +50,22 @@ function resolveJwtSecret(): string {
   return generatedSecret;
 }
 
+let warnedAboutDb = false;
+
 function resolveDatabaseUrl(): string {
   const url = process.env.DATABASE_URL;
-  if (!url) {
-    throw new Error(
-      "DATABASE_URL is required. Set it in your environment before starting."
+  if (url) return url;
+
+  // Fallback placeholder connection string.
+  // This prevents Next.js from crashing at build-time/import-time when DATABASE_URL is unset.
+  if (!warnedAboutDb) {
+    warnedAboutDb = true;
+    console.warn(
+      "[env] DATABASE_URL is not set. Falling back to a placeholder connection string. " +
+        "You must configure a valid PostgreSQL connection string in your environment before querying the database."
     );
   }
-  return url;
+  return "postgresql://dummy_user:dummy_pass@127.0.0.1:5432/dummy_db";
 }
 
 export const env = {

@@ -7,12 +7,17 @@ import { SkeletonCard } from "@/components/ui";
 
 const loading = () => <SkeletonCard />;
 
-const BlockPuzzle = dynamic(() => import("@/components/BlockPuzzle"), { loading });
-const MemoryMatch = dynamic(() => import("@/components/games/MemoryMatch"), { loading });
-const Game2048 = dynamic(() => import("@/components/games/Game2048"), { loading });
-const SlidingPuzzle = dynamic(() => import("@/components/games/SlidingPuzzle"), { loading });
-const Sudoku = dynamic(() => import("@/components/games/Sudoku"), { loading });
-const ColorFlood = dynamic(() => import("@/components/games/ColorFlood"), { loading });
+const BlockPuzzle = dynamic(() => import("@/game/Grid Block Puzzle/BlockPuzzle"), { loading });
+const MemoryMatch = dynamic(() => import("@/game/Memory Match/MemoryMatch"), { loading });
+const Game2048 = dynamic(() => import("@/game/2048/Game2048"), { loading });
+const SlidingPuzzle = dynamic(() => import("@/game/Sliding Puzzle/SlidingPuzzle"), { loading });
+const Sudoku = dynamic(() => import("@/game/Sudoku/Sudoku"), { loading });
+const ColorFlood = dynamic(() => import("@/game/Color Flood/ColorFlood"), { loading });
+const Minesweeper = dynamic(() => import("@/game/Minesweeper/Minesweeper"), { loading });
+const WordGuess = dynamic(() => import("@/game/Word Guess/WordGuess"), { loading });
+const WaterSort = dynamic(() => import("@/game/Water Sort/WaterSort"), { loading });
+const FlowLink = dynamic(() => import("@/game/Flow Link/FlowLink"), { loading });
+const Nonogram = dynamic(() => import("@/game/Nonogram Picross/Nonogram"), { loading });
 
 export default function GameRunner({ game }: { game: GameDef }) {
   return (
@@ -40,6 +45,11 @@ export default function GameRunner({ game }: { game: GameDef }) {
       {game.slug === "sliding-puzzle" && <SlidingPuzzle />}
       {game.slug === "sudoku" && <Sudoku />}
       {game.slug === "color-flood" && <ColorFlood />}
+      {game.slug === "minesweeper" && <Minesweeper />}
+      {game.slug === "word-guess" && <WordGuess />}
+      {game.slug === "water-sort" && <WaterSort />}
+      {game.slug === "flow-link" && <FlowLink />}
+      {game.slug === "nonogram" && <Nonogram />}
     </div>
   );
 }

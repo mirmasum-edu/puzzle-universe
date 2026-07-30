@@ -28,6 +28,11 @@ const VALID_MODES = new Set([
   "sliding",
   "sudoku",
   "flood",
+  "minesweeper",
+  "word-guess",
+  "water-sort",
+  "flow-link",
+  "nonogram",
 ]);
 
 export async function POST(req: Request) {

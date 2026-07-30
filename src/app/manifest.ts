@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Puzzle Universe",
     short_name: "Puzzles",
     description:
-      "A polished puzzle game platform with six free games, leaderboards, achievements and daily missions.",
+      "A polished puzzle game platform with eleven complete, fully playable games, leaderboards, achievements and daily missions.",
     start_url: "/dashboard",
     display: "standalone",
     background_color: "#0b1020",
