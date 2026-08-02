@@ -56,19 +56,20 @@ function resolveDatabaseUrl(): string {
   const url = process.env.DATABASE_URL;
   if (url) return url;
 
-  // Fully prepared live Supabase fallback:
-  // Allows immediate automatic database connection on Vercel out-of-the-box without manual variables setup!
+  // A placeholder prevents Next.js from crashing during build-time imports.
+  // Runtime database access is guarded by the calling route.
   if (!warnedAboutDb) {
     warnedAboutDb = true;
     console.warn(
-      "[env] DATABASE_URL is not set. Falling back to the pre-configured live Supabase database."
+      "[env] DATABASE_URL is not set. Configure a valid PostgreSQL connection string before handling database requests."
     );
   }
-  return "postgresql://postgres:mirmasum12345@db.heixikwlfmaueythhcrz.supabase.co:5432/postgres";
+  return "postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder";
 }
 
 export const env = {
   isProd,
+  hasDatabaseUrl: Boolean(process.env.DATABASE_URL),
   get databaseUrl() {
     return resolveDatabaseUrl();
   },

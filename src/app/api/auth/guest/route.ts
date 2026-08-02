@@ -1,10 +1,18 @@
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { setSession } from "@/lib/auth";
+import { env } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  if (!env.hasDatabaseUrl) {
+    return Response.json(
+      { error: "Guest sessions are unavailable because the database is not configured." },
+      { status: 503 }
+    );
+  }
+
   const randomId = Math.floor(1000 + Math.random() * 9000);
   const username = `Guest_${randomId}`;
 
@@ -42,6 +50,16 @@ export async function GET() {
     });
   } catch (err) {
     console.error("Auto-guest generation error:", err);
+    const code =
+      typeof err === "object" && err !== null && "code" in err
+        ? String(err.code)
+        : "";
+    if (["ENOTFOUND", "ECONNREFUSED", "ETIMEDOUT", "28P01"].includes(code)) {
+      return Response.json(
+        { error: "Guest sessions are temporarily unavailable because the database cannot be reached." },
+        { status: 503 }
+      );
+    }
     return Response.json({ error: "Failed to create guest session." }, { status: 500 });
   }
 }
