@@ -13,6 +13,12 @@ export const pool =
     max: 10,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 10_000,
+    ssl:
+      env.databaseUrl.includes("supabase") ||
+      env.databaseUrl.includes("neon.tech") ||
+      env.isProd
+        ? { rejectUnauthorized: false }
+        : undefined,
   });
 
 if (process.env.NODE_ENV !== "production") {

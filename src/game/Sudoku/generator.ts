@@ -1,4 +1,4 @@
-export type Board = number[]; // length 81, 0 = empty
+export type Board = number[]; // A Sudoku board: 81 cells, with 0 representing empty.
 
 function shuffled<T>(arr: T[]): T[] {
   const a = arr.slice();

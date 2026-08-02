@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useUser } from "@/components/UserContext";
 import { useToast } from "@/components/Toast";
 import { api } from "@/lib/client";
+import { Modal, Field, inputCls } from "@/components/ui";
 
 type NavItem = { href: string; label: string; icon: string; admin?: boolean };
 
@@ -18,19 +19,35 @@ const NAV: NavItem[] = [
   { href: "/dashboard/shop", label: "Shop", icon: "🛍️" },
   { href: "/dashboard/events", label: "Events", icon: "🎉" },
   { href: "/dashboard/profile", label: "Profile", icon: "👤" },
+  { href: "/dashboard/about", label: "About Creator", icon: "👨‍💻" },
   { href: "/dashboard/admin", label: "Admin", icon: "🛠️", admin: true },
 ];
 
 type Notif = { id: number; title: string; body: string; type: string; read: boolean; createdAt: string };
 
+const COUNTRIES = ["US", "UK", "CA", "AU", "DE", "IN", "BD", "ID", "BR", "PH"];
+
 export default function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { me } = useUser();
+  const { me, refresh } = useUser();
   const { push } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [online, setOnline] = useState(true);
+
+  // Guest Account & Auth Modal States
+  const [modalOpen, setModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"link" | "login">("link");
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    country: "US",
+  });
+
+  const isGuest = me?.email?.endsWith("@guest.puzzle.dev") || false;
 
   useEffect(() => {
     const sync = () => setOnline(navigator.onLine);
@@ -69,6 +86,37 @@ export default function Shell({ children }: { children: ReactNode }) {
     await api("/api/notifications", { method: "POST", body: JSON.stringify({ action: "markAllRead" }) }).catch(() => {});
   }
 
+  // Handle linking/upgrade or login submit inside the modal
+  async function handleAuthSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (authMode === "link") {
+        await api("/api/auth/upgrade", {
+          method: "POST",
+          body: JSON.stringify(form),
+        });
+        push(`Progress saved successfully! Welcome, ${form.username}! 🎉`, "success");
+        setModalOpen(false);
+        refresh();
+      } else {
+        await api("/api/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ email: form.email, password: form.password }),
+        });
+        push("Logged in successfully! Welcome back! 🎉", "success");
+        setModalOpen(false);
+        refresh();
+        window.location.reload(); // Refresh the app shell to hydrate full state
+      }
+    } catch (err) {
+      push(err instanceof Error ? err.message : "Something went wrong", "error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const nav = NAV.filter((n) => !n.admin || me?.role === "admin");
 
   return (
@@ -103,6 +151,21 @@ export default function Shell({ children }: { children: ReactNode }) {
               </Link>
             );
           })}
+
+          {/* Glowing Save Progress button for Guest sessions */}
+          {isGuest && (
+            <button
+              onClick={() => {
+                setAuthMode("link");
+                setForm({ username: "", email: "", password: "", country: "US" });
+                setModalOpen(true);
+              }}
+              className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-violet-300 bg-violet-500/15 hover:bg-violet-500/25 border border-violet-500/30 transition cursor-pointer animate-pulse mt-4 shadow-lg shadow-violet-500/10"
+            >
+              <span className="text-lg">💾</span>
+              Save Progress
+            </button>
+          )}
         </nav>
         <button
           onClick={logout}
@@ -189,6 +252,129 @@ export default function Shell({ children }: { children: ReactNode }) {
 
         <main className="p-4 lg:p-8 max-w-7xl mx-auto">{children}</main>
       </div>
+
+      {/* Guest Account "Save Progress" / Log In Modal */}
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={authMode === "link" ? "💾 Save Your Progress" : "👤 Log In to Account"}
+      >
+        <form onSubmit={handleAuthSubmit} className="space-y-4">
+          <div className="flex rounded-xl bg-white/5 p-1 mb-2">
+            <button
+              type="button"
+              onClick={() => setAuthMode("link")}
+              className={`flex-1 rounded-lg py-1.5 text-xs font-semibold capitalize transition ${
+                authMode === "link" ? "bg-violet-500 text-white" : "text-white/60"
+              }`}
+            >
+              Save & Link
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthMode("login")}
+              className={`flex-1 rounded-lg py-1.5 text-xs font-semibold capitalize transition ${
+                authMode === "login" ? "bg-violet-500 text-white" : "text-white/60"
+              }`}
+            >
+              Sign In
+            </button>
+          </div>
+
+          {authMode === "link" ? (
+            <>
+              <p className="text-xs text-white/50 leading-relaxed mb-2">
+                Convert your guest session into a permanent account! Link an email and password to secure your scores, levels, coins, and unlocks forever.
+              </p>
+              <Field label="Username">
+                <input
+                  className={inputCls}
+                  value={form.username}
+                  onChange={(e) => setForm({ ...form, username: e.target.value })}
+                  placeholder="PuzzleChampion"
+                  required
+                />
+              </Field>
+              <Field label="Email Address">
+                <input
+                  type="email"
+                  className={inputCls}
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="name@example.com"
+                  required
+                />
+              </Field>
+              <Field label="Create Password">
+                <input
+                  type="password"
+                  className={inputCls}
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="••••••••"
+                  required
+                />
+              </Field>
+              <Field label="Country">
+                <select
+                  className={inputCls}
+                  value={form.country}
+                  onChange={(e) => setForm({ ...form, country: e.target.value })}
+                >
+                  {COUNTRIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </>
+          ) : (
+            <>
+              <p className="text-xs text-white/50 leading-relaxed mb-2">
+                Log in to sync with your existing permanent profile. Note: Current guest stats will be overwritten by your saved profile.
+              </p>
+              <Field label="Email Address">
+                <input
+                  type="email"
+                  className={inputCls}
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="you@example.com"
+                  required
+                />
+              </Field>
+              <Field label="Password">
+                <input
+                  type="password"
+                  className={inputCls}
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="••••••••"
+                  required
+                />
+              </Field>
+            </>
+          )}
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setModalOpen(false)}
+              className="flex-1 rounded-xl bg-white/10 py-2.5 text-xs font-semibold text-white/80"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 py-2.5 text-xs font-semibold text-white disabled:opacity-50"
+            >
+              {loading ? "Processing…" : authMode === "link" ? "Create & Link" : "Log In"}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

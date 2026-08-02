@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { generate, Difficulty, Board } from "@/lib/sudoku";
+import { generate, Difficulty, Board } from "./generator";
 import { useSubmitScore } from "@/lib/useSubmitScore";
 import GameOverlay from "@/components/GameOverlay";
 
@@ -52,6 +52,7 @@ export default function Sudoku() {
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     newGame("easy");
     return () => stopTimer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
