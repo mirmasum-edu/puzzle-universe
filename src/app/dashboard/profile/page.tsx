@@ -24,7 +24,10 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
-    if (me) setForm({ username: me.username, country: me.country, avatar: me.avatar });
+    if (me) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setForm({ username: me.username, country: me.country, avatar: me.avatar });
+    }
   }, [me]);
 
   async function save(e: React.FormEvent) {

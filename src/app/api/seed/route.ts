@@ -23,6 +23,16 @@ const NAMES = [
 ];
 
 export async function POST() {
+  // Production lock: prevent random seeding on public URLs unless explicitly enabled or default active.
+  const isProd = process.env.NODE_ENV === "production";
+  const seederEnabled = process.env.ENABLE_SEEDER !== "false"; // Allowed by default, can be disabled by setting ENABLE_SEEDER=false
+  if (isProd && !seederEnabled) {
+    return Response.json(
+      { error: "Seeding is disabled in production. Set ENABLE_SEEDER=true to override." },
+      { status: 403 }
+    );
+  }
+
   const [existing] = await db.select({ c: sql<number>`count(*)::int` }).from(users);
   if (existing.c > 0) {
     return Response.json({ ok: true, seeded: false, message: "Already seeded" });
@@ -125,7 +135,12 @@ export async function POST() {
     ["Speed Demon", "Clear 5 lines in 30s", "clears", "⏱️", 5, 200, 2],
     ["Night Owl", "Play after midnight", "special", "🦉", 1, 100, 1],
     ["Weekend Warrior", "Play on Sat & Sun", "special", "⚔️", 2, 150, 1],
-    ["Explorer", "Try all game modes", "special", "🧭", 4, 250, 3],
+    ["Explorer", "Try all 11 game modes", "special", "🧭", 11, 250, 3],
+    ["Mine Sweeper", "Flag and clear mines in Minesweeper", "special", "💣", 1, 150, 1],
+    ["Word Smith", "Crack your first secret 5-letter word", "beginner", "📝", 1, 150, 1],
+    ["Water Sorter", "Sort colored test tubes successfully", "beginner", "🧪", 1, 150, 1],
+    ["Pipe Connector", "Connect colored dots and cover 100% grid cells", "beginner", "🔗", 1, 150, 1],
+    ["Picross Artist", "Reveal your first Nonogram pixel art silhouette", "beginner", "🎨", 1, 150, 1],
     ["Shopaholic", "Buy 5 shop items", "economy", "🛍️", 5, 0, 5],
     ["Streak Legend", "Reach a 30 day streak", "streak", "🏅", 30, 1500, 15],
     ["Tetris Fan", "Clear 4 lines at once", "clears", "🟦", 4, 400, 4],

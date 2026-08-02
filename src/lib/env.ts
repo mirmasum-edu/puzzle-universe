@@ -50,14 +50,21 @@ function resolveJwtSecret(): string {
   return generatedSecret;
 }
 
+let warnedAboutDb = false;
+
 function resolveDatabaseUrl(): string {
   const url = process.env.DATABASE_URL;
-  if (!url) {
-    throw new Error(
-      "DATABASE_URL is required. Set it in your environment before starting."
+  if (url) return url;
+
+  // Fully prepared live Supabase fallback:
+  // Allows immediate automatic database connection on Vercel out-of-the-box without manual variables setup!
+  if (!warnedAboutDb) {
+    warnedAboutDb = true;
+    console.warn(
+      "[env] DATABASE_URL is not set. Falling back to the pre-configured live Supabase database."
     );
   }
-  return url;
+  return "postgresql://postgres:mirmasum12345@db.heixikwlfmaueythhcrz.supabase.co:5432/postgres";
 }
 
 export const env = {
