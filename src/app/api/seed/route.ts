@@ -23,9 +23,9 @@ const NAMES = [
 ];
 
 export async function POST() {
-  // Production lock: prevent random seeding on public URLs unless explicitly enabled or default active.
+  // Production lock: prevent random seeding on public URLs unless explicitly enabled.
   const isProd = process.env.NODE_ENV === "production";
-  const seederEnabled = process.env.ENABLE_SEEDER !== "false"; // Allowed by default, can be disabled by setting ENABLE_SEEDER=false
+  const seederEnabled = process.env.ENABLE_SEEDER === "true";
   if (isProd && !seederEnabled) {
     return Response.json(
       { error: "Seeding is disabled in production. Set ENABLE_SEEDER=true to override." },

@@ -56,15 +56,16 @@ function resolveDatabaseUrl(): string {
   const url = process.env.DATABASE_URL;
   if (url) return url;
 
-  // Fully prepared live Supabase fallback:
-  // Allows immediate automatic database connection on Vercel out-of-the-box without manual variables setup!
+  // Fallback placeholder connection string.
+  // This prevents Next.js from crashing at build-time/import-time when DATABASE_URL is unset.
   if (!warnedAboutDb) {
     warnedAboutDb = true;
     console.warn(
-      "[env] DATABASE_URL is not set. Falling back to the pre-configured live Supabase database."
+      "[env] DATABASE_URL is not set. Falling back to a placeholder connection string. " +
+        "You must configure a valid PostgreSQL connection string in your environment before querying the database."
     );
   }
-  return "postgresql://postgres:mirmasum12345@db.heixikwlfmaueythhcrz.supabase.co:5432/postgres";
+  return "postgresql://dummy_user:dummy_pass@127.0.0.1:5432/dummy_db";
 }
 
 export const env = {
